@@ -33,6 +33,7 @@ jobs:
                --script examples/echo-server.lisp &
           pid="$!"
           (set +x ; while ! nc -z localhost 5000 ; do sleep 0.1 ; done)
+          echo wat | nc localhost 5000
           #[[ "Hello brother" == "$(echo Hello brother | nc localhost 5000)" ]]
           kill -INT "$pid"
           wait "$pid"
