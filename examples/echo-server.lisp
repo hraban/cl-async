@@ -18,7 +18,7 @@
 
 ;; To make this example self sufficient on CI
 (let* ((sh (format NIL
-                   "set -euo pipefail
+                   "set -euo pipefail -x
                    sleep 1
                    echo \"Hi, you are $PPID\" | nc localhost 5000
                    kill -INT $PPID"))
