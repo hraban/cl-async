@@ -1,0 +1,34 @@
+name: "Test"
+
+on:
+  push:
+    branches:
+      - '**'
+
+jobs:
+  examples:
+    timeout-minutes: 10
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+      - name: Install Lisp etc
+        run: |
+          sudo apt-get install -y --no-install-recommends sbcl libuv1{,-dev} wget
+      - name: Install QuickLisp
+        run: |
+          wget https://beta.quicklisp.org/quicklisp.lisp
+          sbcl --noinform --disable-ldb --lose-on-corruption --end-runtime-options \
+               --disable-debugger --no-userinit --no-sysinit --noprint \
+               --load quicklisp.lisp \
+               --eval '(quicklisp-quickstart:install)' \
+               --quit
+          mkdir -p ~/quicklisp/local-projects/
+          ln -s "$PWD" ~/quicklisp/local-projects/cl-async
+      - name: Run examples
+        run: |
+          for f in examples/*.lisp; do
+            sbcl --noinform --disable-ldb --lose-on-corruption --end-runtime-options \
+                 --load ~/quicklisp/setup.lisp --script \
+                 "$f"
+          done
