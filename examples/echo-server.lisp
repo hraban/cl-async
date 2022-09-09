@@ -20,7 +20,7 @@
 (let* ((sh (format NIL
                    "set -euo pipefail
                    sleep 1
-                   echo hi there | nc localhost 5000
+                   echo \"Hi, you are $PPID\" | nc localhost 5000
                    kill -INT $PPID"))
        (proc (uiop:launch-program `("bash" "-c" ,sh)
                                   :output :interactive

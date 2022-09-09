@@ -29,6 +29,6 @@ jobs:
         run: |
           for f in examples/*.lisp; do
             sbcl --noinform --disable-ldb --lose-on-corruption --end-runtime-options \
-                 --load ~/quicklisp/setup.lisp --script \
-                 "$f"
+                 --load ~/quicklisp/setup.lisp \
+                 --script "$f"
           done
