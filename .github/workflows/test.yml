@@ -25,7 +25,7 @@ jobs:
           echo done
           exit 3
 
-  sbcl:
+  sbcl2:
     name: Test 2
     timeout-minutes: 10
     runs-on: ubuntu-latest
