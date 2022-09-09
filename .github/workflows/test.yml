@@ -27,7 +27,7 @@ jobs:
           ln -s "$PWD" ~/quicklisp/local-projects/cl-async
       - name: Run echo-server.lisp
         run: |
-          set -xeuo pipefail
+          set -xeu
           # For some insane reason you need to touch the SBCL binary somehow
           # before you background it, or it won’t be killable with SIGINT.
           # Don’t ask me how I figured this out. Where would one even report
