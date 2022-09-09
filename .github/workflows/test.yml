@@ -10,15 +10,6 @@ jobs:
     timeout-minutes: 10
     runs-on: ubuntu-latest
     steps:
-      - name: Test
-        run: |
-          set -x
-          bash -c "echo test ; sleep inf" &
-          pid=$!
-          kill -INT $pid
-          wait $pid
-          echo done
-          exit 3
       - name: Checkout code
         uses: actions/checkout@v2
       - name: Install Lisp etc
@@ -34,6 +25,16 @@ jobs:
                --quit
           mkdir -p ~/quicklisp/local-projects/
           ln -s "$PWD" ~/quicklisp/local-projects/cl-async
+      - name: Test
+        run: |
+          set -x
+          sbcl --quit --disable-debugger --eval '(sleep 123123)' &
+          pid=$!
+          kill -INT $pid
+          echo killed
+          wait $pid
+          echo done
+          exit 3
       - name: Run other examples
         run: |
           set -xeuo pipefail
