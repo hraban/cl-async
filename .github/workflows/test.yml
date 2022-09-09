@@ -6,25 +6,33 @@ on:
       - '**'
 
 jobs:
-  examples:
+  sbcl:
+    name: Test 1
     timeout-minutes: 10
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v2
       - name: Install Lisp etc
         run: |
           sudo apt-get install -y --no-install-recommends sbcl libuv1{,-dev} wget
-      - name: Install QuickLisp
+      - name: Test
         run: |
-          wget https://beta.quicklisp.org/quicklisp.lisp
-          sbcl --noinform --disable-ldb --lose-on-corruption --end-runtime-options \
-               --disable-debugger --no-userinit --no-sysinit --noprint \
-               --load quicklisp.lisp \
-               --eval '(quicklisp-quickstart:install)' \
-               --quit
-          mkdir -p ~/quicklisp/local-projects/
-          ln -s "$PWD" ~/quicklisp/local-projects/cl-async
+          set -x
+          sbcl --quit --disable-debugger --eval '(sleep 123123)' &
+          pid=$!
+          kill -INT $pid
+          echo killed
+          wait $pid
+          echo done
+          exit 3
+
+  sbcl:
+    name: Test 2
+    timeout-minutes: 10
+    runs-on: ubuntu-latest
+    steps:
+      - name: Install Lisp etc
+        run: |
+          sudo apt-get install -y --no-install-recommends sbcl libuv1{,-dev} wget
       - name: Test
         run: |
           set -x
@@ -37,27 +45,3 @@ jobs:
           wait $pid
           echo done
           exit 3
-      - name: Run other examples
-        run: |
-          set -xeuo pipefail
-          for f in examples/*.lisp; do
-            if [[ "$f" == "examples/echo-server.lisp" ]]; then
-              continue
-            fi
-            sbcl --noinform --disable-ldb --lose-on-corruption --end-runtime-options \
-                 --load ~/quicklisp/setup.lisp \
-                 --script "$f"
-          done
-      - name: Run echo-server.lisp
-        # Special case. Run this last so we have all libraries installed which
-        # makes predicting the load time easier.
-        run: |
-          set -xeuo pipefail
-          sbcl --noinform --disable-ldb --lose-on-corruption --end-runtime-options \
-               --load ~/quicklisp/setup.lisp \
-               --script examples/echo-server.lisp &
-          pid="$!"
-          sleep 2
-          [[ "Hello brother" == "$(echo Hello brother | nc localhost 5000)" ]]
-          kill -INT "$pid"
-          wait "$pid"
