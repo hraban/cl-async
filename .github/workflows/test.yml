@@ -34,12 +34,11 @@ jobs:
           # this bug?
           which sbcl
           xxd $(which sbcl) | head
-          # sbcl --noinform --disable-ldb --lose-on-corruption --end-runtime-options \
-          #      --load ~/quicklisp/setup.lisp \
-          #      --script examples/echo-server.lisp &
-          sbcl --quit --disable-debugger --eval '(sleep 123123)' &
+          sbcl --noinform --disable-ldb --lose-on-corruption --end-runtime-options \
+               --load ~/quicklisp/setup.lisp \
+               --script examples/echo-server.lisp &
           pid="$!"
-          #(set +x ; while ! nc -z localhost 5000 ; do sleep 0.1 ; done)
+          (set +x ; while ! nc -z localhost 5000 ; do sleep 0.1 ; done)
           #[[ "Hello brother" == "$(echo Hello brother | nc localhost 5000)" ]]
           kill -INT "$pid"
           wait "$pid"
