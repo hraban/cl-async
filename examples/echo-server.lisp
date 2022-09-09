@@ -8,6 +8,7 @@
     (lambda (sock data)
       ;; echo data back to client
       (as:write-socket-data sock data))
+    :event-cb
     (lambda (ev)
       (format t "ev: ~a~%" ev)))
   (as:signal-handler as:+sigint+
@@ -15,6 +16,15 @@
       (declare (ignore sig))
       (as:exit-event-loop))))
 
-(as:start-event-loop #'echo-server)
-
-
+;; To make this example self sufficient on CI
+#+sbcl
+(let* ((sh (format NIL
+                   "sleep 1
+                   echo hi there | nc localhost 5000
+                   kill -INT ~A"
+                   (sb-posix:getpid)))
+       (proc (uiop:launch-program `("sh" "-c" ,sh)
+                                  :output :interactive
+                                  :error-output :interactive)))
+  (as:start-event-loop #'echo-server)
+  (uiop:quit (uiop:wait-process proc)))
