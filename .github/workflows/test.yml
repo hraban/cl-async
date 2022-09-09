@@ -28,12 +28,6 @@ jobs:
       - name: Run echo-server.lisp
         run: |
           set -xeu
-          # For some insane reason you need to touch the SBCL binary somehow
-          # before you background it, or it won’t be killable with SIGINT.
-          # Don’t ask me how I figured this out. Where would one even report
-          # this bug?
-          which sbcl
-          xxd $(which sbcl) | head
           sbcl --noinform --disable-ldb --lose-on-corruption --end-runtime-options \
                --load ~/quicklisp/setup.lisp \
                --script examples/echo-server.lisp &
