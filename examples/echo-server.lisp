@@ -17,13 +17,12 @@
       (as:exit-event-loop))))
 
 ;; To make this example self sufficient on CI
-#+sbcl
 (let* ((sh (format NIL
-                   "sleep 1
+                   "set -euo pipefail
+                   sleep 1
                    echo hi there | nc localhost 5000
-                   kill -INT ~A"
-                   (sb-posix:getpid)))
-       (proc (uiop:launch-program `("sh" "-c" ,sh)
+                   kill -INT $PPID"))
+       (proc (uiop:launch-program `("bash" "-c" ,sh)
                                   :output :interactive
                                   :error-output :interactive)))
   (as:start-event-loop #'echo-server)
