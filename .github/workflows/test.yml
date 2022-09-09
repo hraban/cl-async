@@ -7,8 +7,8 @@ on:
 
 jobs:
   sbcl:
-    name: Test 1
-    timeout-minutes: 10
+    name: "Immediately fork, kill and wait"
+    timeout-minutes: 3
     runs-on: ubuntu-latest
     steps:
       - name: Install Lisp etc
@@ -23,20 +23,18 @@ jobs:
           echo killed
           wait $pid
           echo done
-          exit 3
 
   sbcl2:
-    name: Test 2
-    timeout-minutes: 10
+    name: "Read the SBCL binary contents first (?!)"
+    timeout-minutes: 3
     runs-on: ubuntu-latest
     steps:
       - name: Install Lisp etc
         run: |
           sudo apt-get install -y --no-install-recommends sbcl libuv1{,-dev} wget
-      - name: Test
+      - name: Test background
         run: |
           set -x
-          file $(which sbcl)
           xxd $(which sbcl) | head
           sbcl --quit --disable-debugger --eval '(sleep 123123)' &
           pid=$!
@@ -44,4 +42,44 @@ jobs:
           echo killed
           wait $pid
           echo done
-          exit 3
+
+  sbcl3:
+    name: "Run a different SBCL command before the backgrounded one"
+    timeout-minutes: 3
+    runs-on: ubuntu-latest
+    steps:
+      - name: Install Lisp etc
+        run: |
+          sudo apt-get install -y --no-install-recommends sbcl libuv1{,-dev} wget
+      - name: Test background
+        run: |
+          set -x
+          sbcl --quit --disable-debugger --eval '(print 222)'
+          sbcl --quit --disable-debugger --eval '(sleep 123123)' &
+          pid=$!
+          kill -INT $pid
+          echo killed
+          wait $pid
+          echo done
+
+  sbcl4:
+    name: "Read the raw SBCL binary contents in a separate step"
+    timeout-minutes: 3
+    runs-on: ubuntu-latest
+    steps:
+      - name: Install Lisp etc
+        run: |
+          sudo apt-get install -y --no-install-recommends sbcl libuv1{,-dev} wget
+      - name: Read binary contents
+        run: |
+          set -x
+          xxd $(which sbcl) | head
+      - name: Test background
+        run: |
+          set -x
+          sbcl --quit --disable-debugger --eval '(sleep 123123)' &
+          pid=$!
+          kill -INT $pid
+          echo killed
+          wait $pid
+          echo done
