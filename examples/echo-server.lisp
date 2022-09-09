@@ -16,14 +16,4 @@
       (declare (ignore sig))
       (as:exit-event-loop))))
 
-;; To make this example self sufficient on CI
-(let* ((sh (format NIL
-                   "set -euo pipefail -x
-                   sleep 1
-                   echo \"Hi, you are $PPID\" | nc localhost 5000
-                   kill -INT $PPID"))
-       (proc (uiop:launch-program `("bash" "-c" ,sh)
-                                  :output :interactive
-                                  :error-output :interactive)))
-  (as:start-event-loop #'echo-server)
-  (uiop:quit (uiop:wait-process proc)))
+(as:start-event-loop #'echo-server)

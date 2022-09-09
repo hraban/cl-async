@@ -27,8 +27,21 @@ jobs:
           ln -s "$PWD" ~/quicklisp/local-projects/cl-async
       - name: Run examples
         run: |
-          for f in examples/*.lisp; do
-            sbcl --noinform --disable-ldb --lose-on-corruption --end-runtime-options \
-                 --load ~/quicklisp/setup.lisp \
-                 --script "$f"
+          cd examples
+          for f in *.lisp; do
+            if [[ f == "echo-server.lisp" ]]; then
+              # Special case
+              sbcl --noinform --disable-ldb --lose-on-corruption --end-runtime-options \
+                   --load ~/quicklisp/setup.lisp \
+                   --script "$f" &
+              pid="$!"
+              sleep 2
+              [[ "Hello brother" == "$(echo Hello brother | nc localhost 5000)" ]]
+              kill -INT "$pid"
+              wait "$pid"
+            else
+              sbcl --noinform --disable-ldb --lose-on-corruption --end-runtime-options \
+                   --load ~/quicklisp/setup.lisp \
+                   --script "$f"
+            fi
           done
