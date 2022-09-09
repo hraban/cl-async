@@ -25,8 +25,20 @@ jobs:
                --quit
           mkdir -p ~/quicklisp/local-projects/
           ln -s "$PWD" ~/quicklisp/local-projects/cl-async
+      - name: Run other examples
+        run: |
+          set -xeuo pipefail
+          for f in examples/*.lisp; do
+            if [[ "$f" == "examples/echo-server.lisp" ]]; then
+              continue
+            fi
+            sbcl --noinform --disable-ldb --lose-on-corruption --end-runtime-options \
+                 --load ~/quicklisp/setup.lisp \
+                 --script "$f"
+          done
       - name: Run echo-server.lisp
-        # Special case
+        # Special case. Run this last so we have all libraries installed which
+        # makes predicting the load time easier.
         run: |
           set -xeuo pipefail
           sbcl --noinform --disable-ldb --lose-on-corruption --end-runtime-options \
@@ -37,12 +49,3 @@ jobs:
           [[ "Hello brother" == "$(echo Hello brother | nc localhost 5000)" ]]
           kill -INT "$pid"
           wait "$pid"
-          rm examples/echo-server.lisp
-      - name: Run other examples
-        run: |
-          set -xeuo pipefail
-          for f in examples/*.lisp; do
-            sbcl --noinform --disable-ldb --lose-on-corruption --end-runtime-options \
-                 --load ~/quicklisp/setup.lisp \
-                 --script "$f"
-          done
