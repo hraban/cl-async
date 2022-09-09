@@ -32,7 +32,8 @@ jobs:
           # before you background it, or it won’t be killable with SIGINT.
           # Don’t ask me how I figured this out. Where would one even report
           # this bug?
-          cat $(which sbcl) > /dev/null
+          which sbcl
+          xxd $(which sbcl) | head
           sbcl --noinform --disable-ldb --lose-on-corruption --end-runtime-options \
                --load ~/quicklisp/setup.lisp \
                --script examples/echo-server.lisp &
