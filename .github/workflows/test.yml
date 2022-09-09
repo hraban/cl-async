@@ -10,6 +10,15 @@ jobs:
     timeout-minutes: 10
     runs-on: ubuntu-latest
     steps:
+      - name: Test
+        run: |
+          set -x
+          bash -c "echo test ; sleep inf" &
+          pid=$!
+          kill -INT $pid
+          wait $pid
+          echo done
+          exit 3
       - name: Checkout code
         uses: actions/checkout@v2
       - name: Install Lisp etc
